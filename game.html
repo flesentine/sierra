@@ -248,7 +248,11 @@
 
       var statusElement = document.getElementById("status");
       var progressElement = document.getElementById("progress");
-      var runtimeVersion = "20260409f";
+      var runtimeVersion = "20260409g";
+      var siteBasePath = window.location.pathname.replace(/[^/]*$/, "");
+      var normalizedBasePath = siteBasePath.endsWith("/") ? siteBasePath.slice(0, -1) : siteBasePath;
+      var gameDataRoot = normalizedBasePath + "/data";
+      var gameDataPath = gameDataRoot + "/games/kq3";
       var loadingCard = document.querySelector(".loading-card");
       var bodyElement = document.body;
       var gameUnlocked = false;
@@ -497,6 +501,40 @@
         };
       };
     </script>
-    <script async src="scummvm.js?v=20260409f"></script>
+    <script>
+      function rewriteRuntimeUrl(url) {
+        if (typeof url !== "string") {
+          return url;
+        }
+        if (url.indexOf("/data/") === 0) {
+          return normalizedBasePath + url;
+        }
+        return url;
+      }
+
+      var originalFetch = window.fetch.bind(window);
+      window.fetch = function (input, init) {
+        if (typeof input === "string") {
+          return originalFetch(rewriteRuntimeUrl(input), init);
+        }
+        if (input && typeof input.url === "string") {
+          return originalFetch(rewriteRuntimeUrl(input.url), init);
+        }
+        return originalFetch(input, init);
+      };
+
+      var originalXHROpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function (method, url) {
+        var rewrittenUrl = rewriteRuntimeUrl(url);
+        return originalXHROpen.apply(this, [method, rewrittenUrl].concat(Array.prototype.slice.call(arguments, 2)));
+      };
+
+      if (!window.location.hash || window.location.hash === "#") {
+        window.location.hash = "--path=" + encodeURIComponent(gameDataPath + " kq3");
+      } else if (window.location.hash.indexOf("--path=/data/games/kq3") !== -1) {
+        window.location.hash = window.location.hash.replace("--path=/data/games/kq3", "--path=" + encodeURIComponent(gameDataPath));
+      }
+    </script>
+    <script async src="scummvm.js?v=20260409g"></script>
   </body>
 </html>

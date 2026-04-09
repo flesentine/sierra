@@ -52,7 +52,7 @@
               <a
                 class="begin-button"
                 id="begin-button"
-                href="./game.html?v=20260409f#--path=/data/games/kq3%20kq3"
+                href="./game.html?v=20260409g#--path=/data/games/kq3%20kq3"
               >
                 Begin Quest
               </a>
@@ -72,8 +72,11 @@
       </section>
     </main>
     <script>
-      const runtimeVersion = "20260409f";
-      const gameUrl = `./game.html?v=${runtimeVersion}#--path=/data/games/kq3%20kq3`;
+      const runtimeVersion = "20260409g";
+      const siteBasePath = window.location.pathname.replace(/[^/]*$/, "");
+      const normalizedBasePath = siteBasePath.endsWith("/") ? siteBasePath.slice(0, -1) : siteBasePath;
+      const gameDataPath = `${normalizedBasePath}/data/games/kq3`;
+      const gameUrl = `./game.html?v=${runtimeVersion}#--path=${encodeURIComponent(gameDataPath + " kq3")}`;
       const status = document.getElementById("status");
       const fileWarning = document.getElementById("file-warning");
       const beginButton = document.getElementById("begin-button");
