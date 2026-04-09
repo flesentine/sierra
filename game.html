@@ -248,11 +248,11 @@
 
       var statusElement = document.getElementById("status");
       var progressElement = document.getElementById("progress");
-      var runtimeVersion = "20260409h";
+      var runtimeVersion = "20260409i";
       var siteBasePath = window.location.pathname.replace(/[^/]*$/, "");
       var normalizedBasePath = siteBasePath.endsWith("/") ? siteBasePath.slice(0, -1) : siteBasePath;
       var gameDataRoot = normalizedBasePath + "/data";
-      var gameDataPath = gameDataRoot + "/games/kq3";
+      var gameDataPath = "/data/games/kq3";
       var loadingCard = document.querySelector(".loading-card");
       var bodyElement = document.body;
       var gameUnlocked = false;
@@ -531,10 +531,13 @@
 
       if (!window.location.hash || window.location.hash === "#") {
         window.location.hash = "--path=" + encodeURI(gameDataPath + " kq3");
-      } else if (window.location.hash.indexOf("--path=/data/games/kq3") !== -1) {
-        window.location.hash = window.location.hash.replace("--path=/data/games/kq3", "--path=" + gameDataPath);
+      } else if (
+        window.location.hash.indexOf("--path=/data/games/kq3") !== -1 ||
+        window.location.hash.indexOf("--path=" + encodeURI(gameDataRoot + "/games/kq3")) !== -1
+      ) {
+        window.location.hash = "--path=" + encodeURI(gameDataPath + " kq3");
       }
     </script>
-    <script async src="scummvm.js?v=20260409h"></script>
+    <script async src="scummvm.js?v=20260409i"></script>
   </body>
 </html>
