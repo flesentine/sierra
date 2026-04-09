@@ -64,7 +64,7 @@
           linear-gradient(180deg, rgb(var(--scene-deep-rgb)), var(--bg-bottom));
         color: var(--paper);
         font-family: Georgia, "Times New Roman", serif;
-        transition: background 70ms linear;
+        transition: background 120ms ease-out;
       }
 
       .loading-shell {
@@ -95,7 +95,7 @@
           -24px 20px 68px rgba(var(--scene-bottom-left-rgb), 0.16),
           24px 20px 68px rgba(var(--scene-bottom-right-rgb), 0.16),
           0 0 128px rgba(var(--scene-rgb), 0.08);
-        transition: border-color 70ms linear, box-shadow 70ms linear;
+        transition: border-color 120ms ease-out, box-shadow 120ms ease-out;
       }
 
       .loading-card::before {
@@ -460,14 +460,14 @@
 
         for (var keyIndex = 0; keyIndex < keys.length; keyIndex += 1) {
           var key = keys[keyIndex];
-          nextState[key] = lerpColor(sceneCurrentState[key], sceneTargetState[key], 0.34);
+          nextState[key] = lerpColor(sceneCurrentState[key], sceneTargetState[key], 0.18);
           if (maxChannelDelta(nextState[key], sceneTargetState[key]) > 3) {
             settled = false;
           }
         }
 
         for (var edgeStateIndex = 0; edgeStateIndex < sceneTargetState.edges.length; edgeStateIndex += 1) {
-          var edgeColor = lerpColor(sceneCurrentState.edges[edgeStateIndex], sceneTargetState.edges[edgeStateIndex], 0.42);
+          var edgeColor = lerpColor(sceneCurrentState.edges[edgeStateIndex], sceneTargetState.edges[edgeStateIndex], 0.22);
           nextState.edges.push(edgeColor);
           if (maxChannelDelta(edgeColor, sceneTargetState.edges[edgeStateIndex]) > 4) {
             settled = false;
