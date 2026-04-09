@@ -211,18 +211,25 @@
       }
 
       .mask-card {
-        width: min(880px, calc(100% - 4rem));
+        width: min(980px, calc(100% - 3rem));
         aspect-ratio: 4 / 3;
         display: grid;
         place-items: center;
         text-align: center;
-        padding: 2rem;
+        padding: 1.5rem;
       }
 
-      .mask-brand {
-        width: min(420px, 62vw);
+      .mask-art {
+        width: min(520px, 72vw);
+        max-height: min(62vh, 700px);
         display: block;
-        margin: 0 auto 1.15rem;
+        margin: 0 auto 1.2rem;
+        border-radius: 18px;
+        border: 1px solid rgba(235, 195, 112, 0.28);
+        box-shadow:
+          0 20px 44px rgba(0, 0, 0, 0.52),
+          0 0 0 1px rgba(255, 214, 140, 0.08);
+        object-fit: contain;
         filter:
           drop-shadow(0 2px 0 rgba(0, 0, 0, 0.55))
           drop-shadow(0 12px 28px rgba(0, 0, 0, 0.45));
@@ -306,7 +313,7 @@
             <div class="mask-card">
               <div>
                 <p class="mask-eyebrow">Sierra Web Edition</p>
-                <img class="mask-brand" src="kq3-logo.svg" alt="King's Quest III" />
+                <img class="mask-art" src="wizard-launch.jpeg" alt="King's Quest III wizard artwork" />
                 <h2>King's Quest III</h2>
                 <p class="mask-copy">Entering the Kingdom</p>
               </div>
