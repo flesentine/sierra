@@ -76,7 +76,7 @@
       const siteBasePath = window.location.pathname.replace(/[^/]*$/, "");
       const normalizedBasePath = siteBasePath.endsWith("/") ? siteBasePath.slice(0, -1) : siteBasePath;
       const gameDataPath = `${normalizedBasePath}/data/games/kq3`;
-      const gameUrl = `./game.html?v=${runtimeVersion}#--path=${encodeURIComponent(gameDataPath + " kq3")}`;
+      const gameUrl = `./game.html?v=${runtimeVersion}#--path=${encodeURI(gameDataPath + " kq3")}`;
       const status = document.getElementById("status");
       const fileWarning = document.getElementById("file-warning");
       const beginButton = document.getElementById("begin-button");

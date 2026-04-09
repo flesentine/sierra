@@ -530,9 +530,9 @@
       };
 
       if (!window.location.hash || window.location.hash === "#") {
-        window.location.hash = "--path=" + encodeURIComponent(gameDataPath + " kq3");
+        window.location.hash = "--path=" + encodeURI(gameDataPath + " kq3");
       } else if (window.location.hash.indexOf("--path=/data/games/kq3") !== -1) {
-        window.location.hash = window.location.hash.replace("--path=/data/games/kq3", "--path=" + encodeURIComponent(gameDataPath));
+        window.location.hash = window.location.hash.replace("--path=/data/games/kq3", "--path=" + gameDataPath);
       }
     </script>
     <script async src="scummvm.js?v=20260409g"></script>
