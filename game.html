@@ -27,6 +27,18 @@
         --scene-bottom-left-rgb: 104, 120, 108;
         --scene-bottom-right-rgb: 170, 98, 44;
         --scene-border-rgb: 108, 68, 150;
+        --edge-0-rgb: 94, 90, 212;
+        --edge-1-rgb: 90, 96, 224;
+        --edge-2-rgb: 104, 96, 216;
+        --edge-3-rgb: 126, 90, 204;
+        --edge-4-rgb: 118, 88, 190;
+        --edge-5-rgb: 154, 92, 48;
+        --edge-6-rgb: 170, 98, 44;
+        --edge-7-rgb: 160, 100, 40;
+        --edge-8-rgb: 124, 108, 70;
+        --edge-9-rgb: 96, 122, 102;
+        --edge-10-rgb: 82, 108, 170;
+        --edge-11-rgb: 88, 98, 196;
       }
 
       * {
@@ -104,15 +116,19 @@
         background:
           conic-gradient(
             from 180deg at 50% 50%,
-            rgba(var(--scene-left-rgb), 0.9) 0deg,
-            rgba(var(--scene-bottom-left-rgb), 0.88) 38deg,
-            rgba(var(--scene-bottom-rgb), 0.86) 84deg,
-            rgba(var(--scene-bottom-right-rgb), 0.88) 128deg,
-            rgba(var(--scene-right-rgb), 0.92) 180deg,
-            rgba(var(--scene-top-right-rgb), 0.9) 234deg,
-            rgba(var(--scene-top-rgb), 0.86) 278deg,
-            rgba(var(--scene-top-left-rgb), 0.92) 322deg,
-            rgba(var(--scene-left-rgb), 0.9) 360deg
+            rgba(var(--edge-11-rgb), 0.92) 0deg,
+            rgba(var(--edge-10-rgb), 0.9) 30deg,
+            rgba(var(--edge-9-rgb), 0.88) 60deg,
+            rgba(var(--edge-8-rgb), 0.86) 90deg,
+            rgba(var(--edge-7-rgb), 0.88) 120deg,
+            rgba(var(--edge-6-rgb), 0.9) 150deg,
+            rgba(var(--edge-5-rgb), 0.92) 180deg,
+            rgba(var(--edge-4-rgb), 0.9) 210deg,
+            rgba(var(--edge-3-rgb), 0.9) 240deg,
+            rgba(var(--edge-2-rgb), 0.92) 270deg,
+            rgba(var(--edge-1-rgb), 0.94) 300deg,
+            rgba(var(--edge-0-rgb), 0.94) 330deg,
+            rgba(var(--edge-11-rgb), 0.92) 360deg
           );
         -webkit-mask:
           linear-gradient(#000 0 0) content-box,
@@ -345,15 +361,33 @@
         ];
       }
 
-      function setSceneTint(rgb, regions) {
-        var topRgb = regions[1];
-        var bottomRgb = regions[7];
-        var leftRgb = regions[3];
-        var rightRgb = regions[5];
-        var topLeftRgb = regions[0];
-        var topRightRgb = regions[2];
-        var bottomLeftRgb = regions[6];
-        var bottomRightRgb = regions[8];
+      function averageColors(colors) {
+        var red = 0;
+        var green = 0;
+        var blue = 0;
+
+        for (var colorIndex = 0; colorIndex < colors.length; colorIndex += 1) {
+          red += colors[colorIndex][0];
+          green += colors[colorIndex][1];
+          blue += colors[colorIndex][2];
+        }
+
+        return [
+          Math.round(red / colors.length),
+          Math.round(green / colors.length),
+          Math.round(blue / colors.length)
+        ];
+      }
+
+      function setSceneTint(rgb, edgeRegions) {
+        var topLeftRgb = averageColors([edgeRegions[11], edgeRegions[0]]);
+        var topRgb = averageColors([edgeRegions[0], edgeRegions[1], edgeRegions[2], edgeRegions[3]]);
+        var topRightRgb = averageColors([edgeRegions[3], edgeRegions[4]]);
+        var rightRgb = averageColors([edgeRegions[4], edgeRegions[5]]);
+        var bottomRightRgb = averageColors([edgeRegions[5], edgeRegions[6]]);
+        var bottomRgb = averageColors([edgeRegions[6], edgeRegions[7], edgeRegions[8], edgeRegions[9]]);
+        var bottomLeftRgb = averageColors([edgeRegions[8], edgeRegions[9]]);
+        var leftRgb = averageColors([edgeRegions[10], edgeRegions[11]]);
         var deep = [
           Math.max(6, Math.round(rgb[0] * 0.22)),
           Math.max(6, Math.round(rgb[1] * 0.22)),
@@ -380,6 +414,9 @@
         bodyElement.style.setProperty("--scene-top-right-rgb", topRight.join(", "));
         bodyElement.style.setProperty("--scene-bottom-left-rgb", bottomLeft.join(", "));
         bodyElement.style.setProperty("--scene-bottom-right-rgb", bottomRight.join(", "));
+        for (var edgeIndex = 0; edgeIndex < edgeRegions.length; edgeIndex += 1) {
+          bodyElement.style.setProperty("--edge-" + edgeIndex + "-rgb", edgeRegions[edgeIndex].join(", "));
+        }
       }
 
       function sampleSceneTint() {
@@ -416,10 +453,6 @@
         var red = 0;
         var green = 0;
         var blue = 0;
-        var regionWeights = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-        var regionReds = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-        var regionGreens = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-        var regionBlues = [0, 0, 0, 0, 0, 0, 0, 0, 0];
         var rowWidth = sceneSamplerCanvas.width;
         var rowHeight = sceneSamplerCanvas.height;
 
@@ -428,14 +461,18 @@
         }
 
         var buckets = {
-          topLeft: createBucket(),
-          top: createBucket(),
-          topRight: createBucket(),
-          left: createBucket(),
-          right: createBucket(),
-          bottomLeft: createBucket(),
-          bottom: createBucket(),
-          bottomRight: createBucket()
+          top0: createBucket(),
+          top1: createBucket(),
+          top2: createBucket(),
+          top3: createBucket(),
+          right0: createBucket(),
+          right1: createBucket(),
+          bottom3: createBucket(),
+          bottom2: createBucket(),
+          bottom1: createBucket(),
+          bottom0: createBucket(),
+          left1: createBucket(),
+          left0: createBucket()
         };
 
         function addToBucket(bucket, r, g, b, weight) {
@@ -456,6 +493,65 @@
             Math.round(bucket.blue / bucket.weight)
           ];
         }
+
+        function normalizeRange(start, end, size) {
+          var boundedStart = Math.max(0, Math.min(size - 1, start));
+          var boundedEnd = Math.max(boundedStart, Math.min(size - 1, end));
+          return { start: boundedStart, end: boundedEnd };
+        }
+
+        function sampleRangeCount(start, end, fixedIndex, horizontal) {
+          var count = 0;
+          if (horizontal) {
+            for (var sampleX = start; sampleX <= end; sampleX += 1) {
+              var horizontalOffset = (fixedIndex * rowWidth + sampleX) * 4;
+              var horizontalBrightness = imageData[horizontalOffset] + imageData[horizontalOffset + 1] + imageData[horizontalOffset + 2];
+              if (imageData[horizontalOffset + 3] >= 32 && horizontalBrightness >= 42) {
+                count += 1;
+              }
+            }
+          } else {
+            for (var sampleY = start; sampleY <= end; sampleY += 1) {
+              var verticalOffset = (sampleY * rowWidth + fixedIndex) * 4;
+              var verticalBrightness = imageData[verticalOffset] + imageData[verticalOffset + 1] + imageData[verticalOffset + 2];
+              if (imageData[verticalOffset + 3] >= 32 && verticalBrightness >= 42) {
+                count += 1;
+              }
+            }
+          }
+          return count;
+        }
+
+        var contentTop = 0;
+        var contentBottom = rowHeight - 1;
+        var contentLeft = 0;
+        var contentRight = rowWidth - 1;
+        var minRowPixels = Math.max(3, Math.floor(rowWidth * 0.18));
+        var minColumnPixels = Math.max(3, Math.floor(rowHeight * 0.18));
+
+        while (contentTop < rowHeight - 1 && sampleRangeCount(0, rowWidth - 1, contentTop, true) < minRowPixels) {
+          contentTop += 1;
+        }
+        while (contentBottom > contentTop && sampleRangeCount(0, rowWidth - 1, contentBottom, true) < minRowPixels) {
+          contentBottom -= 1;
+        }
+        while (contentLeft < rowWidth - 1 && sampleRangeCount(contentTop, contentBottom, contentLeft, false) < minColumnPixels) {
+          contentLeft += 1;
+        }
+        while (contentRight > contentLeft && sampleRangeCount(contentTop, contentBottom, contentRight, false) < minColumnPixels) {
+          contentRight -= 1;
+        }
+
+        var contentWidth = Math.max(1, contentRight - contentLeft + 1);
+        var contentHeight = Math.max(1, contentBottom - contentTop + 1);
+        var edgeThicknessX = Math.max(2, Math.floor(contentWidth * 0.14));
+        var edgeThicknessY = Math.max(2, Math.floor(contentHeight * 0.16));
+        var topBand = normalizeRange(contentTop, contentTop + edgeThicknessY - 1, rowHeight);
+        var bottomBand = normalizeRange(contentBottom - edgeThicknessY + 1, contentBottom, rowHeight);
+        var leftBand = normalizeRange(contentLeft, contentLeft + edgeThicknessX - 1, rowWidth);
+        var rightBand = normalizeRange(contentRight - edgeThicknessX + 1, contentRight, rowWidth);
+        var topQuarter = Math.max(1, Math.floor(contentWidth / 4));
+        var sideHalf = Math.max(1, Math.floor(contentHeight / 2));
 
         for (var index = 0; index < imageData.length; index += 4) {
           var r = imageData[index];
@@ -483,36 +579,48 @@
           var pixelIndex = index / 4;
           var row = Math.floor(pixelIndex / rowWidth);
           var column = pixelIndex % rowWidth;
-          var x = column / Math.max(1, rowWidth - 1);
-          var y = row / Math.max(1, rowHeight - 1);
-          var isTop = y <= 0.24;
-          var isBottom = y >= 0.76;
-          var isLeft = x <= 0.24;
-          var isRight = x >= 0.76;
+          if (row >= topBand.start && row <= topBand.end) {
+            var topIndex = Math.min(3, Math.floor((column - contentLeft) / topQuarter));
+            if (column >= contentLeft && column <= contentRight) {
+              if (topIndex === 0) {
+                addToBucket(buckets.top0, r, g, b, weight * 1.45);
+              } else if (topIndex === 1) {
+                addToBucket(buckets.top1, r, g, b, weight * 1.55);
+              } else if (topIndex === 2) {
+                addToBucket(buckets.top2, r, g, b, weight * 1.55);
+              } else {
+                addToBucket(buckets.top3, r, g, b, weight * 1.45);
+              }
+            }
+          }
 
-          if (isTop && isLeft) {
-            addToBucket(buckets.topLeft, r, g, b, weight * 1.25);
+          if (column >= leftBand.start && column <= leftBand.end && row >= contentTop && row <= contentBottom) {
+            if (row - contentTop < sideHalf) {
+              addToBucket(buckets.left0, r, g, b, weight * 1.18);
+            } else {
+              addToBucket(buckets.left1, r, g, b, weight * 1.08);
+            }
           }
-          if (isTop && x > 0.18 && x < 0.82) {
-            addToBucket(buckets.top, r, g, b, weight * 1.35);
+
+          if (column >= rightBand.start && column <= rightBand.end && row >= contentTop && row <= contentBottom) {
+            if (row - contentTop < sideHalf) {
+              addToBucket(buckets.right0, r, g, b, weight * 1.18);
+            } else {
+              addToBucket(buckets.right1, r, g, b, weight * 1.08);
+            }
           }
-          if (isTop && isRight) {
-            addToBucket(buckets.topRight, r, g, b, weight * 1.25);
-          }
-          if (isLeft && y > 0.18 && y < 0.82) {
-            addToBucket(buckets.left, r, g, b, weight * 1.15);
-          }
-          if (isRight && y > 0.18 && y < 0.82) {
-            addToBucket(buckets.right, r, g, b, weight * 1.15);
-          }
-          if (isBottom && isLeft) {
-            addToBucket(buckets.bottomLeft, r, g, b, weight * 1.05);
-          }
-          if (isBottom && x > 0.18 && x < 0.82) {
-            addToBucket(buckets.bottom, r, g, b, weight * 1.1);
-          }
-          if (isBottom && isRight) {
-            addToBucket(buckets.bottomRight, r, g, b, weight * 1.05);
+
+          if (row >= bottomBand.start && row <= bottomBand.end && column >= contentLeft && column <= contentRight) {
+            var bottomIndex = Math.min(3, Math.floor((column - contentLeft) / topQuarter));
+            if (bottomIndex === 0) {
+              addToBucket(buckets.bottom0, r, g, b, weight * 1.06);
+            } else if (bottomIndex === 1) {
+              addToBucket(buckets.bottom1, r, g, b, weight * 1.12);
+            } else if (bottomIndex === 2) {
+              addToBucket(buckets.bottom2, r, g, b, weight * 1.12);
+            } else {
+              addToBucket(buckets.bottom3, r, g, b, weight * 1.06);
+            }
           }
         }
 
@@ -525,23 +633,26 @@
           Math.round(green / totalWeight),
           Math.round(blue / totalWeight)
         ];
-        var regions = [
-          readBucket(buckets.topLeft, fallback),
-          readBucket(buckets.top, fallback),
-          readBucket(buckets.topRight, fallback),
-          readBucket(buckets.left, fallback),
-          fallback,
-          readBucket(buckets.right, fallback),
-          readBucket(buckets.bottomLeft, fallback),
-          readBucket(buckets.bottom, fallback),
-          readBucket(buckets.bottomRight, fallback)
+        var edgeRegions = [
+          readBucket(buckets.top0, fallback),
+          readBucket(buckets.top1, fallback),
+          readBucket(buckets.top2, fallback),
+          readBucket(buckets.top3, fallback),
+          readBucket(buckets.right0, fallback),
+          readBucket(buckets.right1, fallback),
+          readBucket(buckets.bottom3, fallback),
+          readBucket(buckets.bottom2, fallback),
+          readBucket(buckets.bottom1, fallback),
+          readBucket(buckets.bottom0, fallback),
+          readBucket(buckets.left1, fallback),
+          readBucket(buckets.left0, fallback)
         ];
 
         setSceneTint([
           Math.round(red / totalWeight),
           Math.round(green / totalWeight),
           Math.round(blue / totalWeight)
-        ], regions);
+        ], edgeRegions);
       }
 
       function startSceneSampling() {
