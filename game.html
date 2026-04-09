@@ -18,6 +18,8 @@
         --magenta: #d34cf0;
         --scene-rgb: 84, 44, 126;
         --scene-deep-rgb: 24, 12, 36;
+        --scene-top-rgb: 104, 82, 188;
+        --scene-bottom-rgb: 156, 88, 38;
         --scene-border-rgb: 108, 68, 150;
       }
 
@@ -47,14 +49,16 @@
         width: min(1100px, 100%);
         min-height: min(86vh, 760px);
         overflow: hidden;
-        border: 1px solid rgba(var(--scene-border-rgb), 0.72);
+        border: 1px solid transparent;
         border-radius: 28px;
         background:
           linear-gradient(180deg, rgba(12, 13, 20, 0.94), rgba(8, 6, 12, 0.97));
         box-shadow:
           0 24px 80px rgba(0, 0, 0, 0.45),
-          0 0 0 1px rgba(var(--scene-border-rgb), 0.18),
-          0 0 120px rgba(var(--scene-rgb), 0.12);
+          0 0 0 1px rgba(var(--scene-border-rgb), 0.16),
+          0 -10px 60px rgba(var(--scene-top-rgb), 0.18),
+          0 18px 70px rgba(var(--scene-bottom-rgb), 0.16),
+          0 0 120px rgba(var(--scene-rgb), 0.1);
         transition: border-color 480ms ease, box-shadow 480ms ease;
       }
 
@@ -70,6 +74,27 @@
             transparent 2px,
             transparent 6px
           );
+        pointer-events: none;
+      }
+
+      .loading-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        padding: 1px;
+        border-radius: inherit;
+        background:
+          linear-gradient(
+            180deg,
+            rgba(var(--scene-top-rgb), 0.95) 0%,
+            rgba(var(--scene-border-rgb), 0.62) 38%,
+            rgba(var(--scene-bottom-rgb), 0.88) 100%
+          );
+        -webkit-mask:
+          linear-gradient(#000 0 0) content-box,
+          linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
         pointer-events: none;
       }
 
@@ -278,21 +303,29 @@
         }, 1500);
       }
 
-      function setSceneTint(rgb) {
+      function blendColor(rgb, multiplier, offset, minimums) {
+        return [
+          Math.max(minimums[0], Math.min(255, Math.round(rgb[0] * multiplier + offset))),
+          Math.max(minimums[1], Math.min(255, Math.round(rgb[1] * multiplier + offset))),
+          Math.max(minimums[2], Math.min(255, Math.round(rgb[2] * multiplier + offset)))
+        ];
+      }
+
+      function setSceneTint(rgb, topRgb, bottomRgb) {
         var deep = [
           Math.max(6, Math.round(rgb[0] * 0.22)),
           Math.max(6, Math.round(rgb[1] * 0.22)),
           Math.max(8, Math.round(rgb[2] * 0.26))
         ];
-        var border = [
-          Math.min(255, Math.round(rgb[0] * 0.82 + 22)),
-          Math.min(255, Math.round(rgb[1] * 0.82 + 22)),
-          Math.min(255, Math.round(rgb[2] * 0.82 + 22))
-        ];
+        var border = blendColor(rgb, 0.86, 24, [24, 24, 30]);
+        var top = blendColor(topRgb, 0.98, 14, [28, 28, 42]);
+        var bottom = blendColor(bottomRgb, 0.94, 12, [32, 24, 18]);
 
         bodyElement.style.setProperty("--scene-rgb", rgb.join(", "));
         bodyElement.style.setProperty("--scene-deep-rgb", deep.join(", "));
         bodyElement.style.setProperty("--scene-border-rgb", border.join(", "));
+        bodyElement.style.setProperty("--scene-top-rgb", top.join(", "));
+        bodyElement.style.setProperty("--scene-bottom-rgb", bottom.join(", "));
       }
 
       function sampleSceneTint() {
@@ -329,6 +362,15 @@
         var red = 0;
         var green = 0;
         var blue = 0;
+        var topWeight = 0;
+        var topRed = 0;
+        var topGreen = 0;
+        var topBlue = 0;
+        var bottomWeight = 0;
+        var bottomRed = 0;
+        var bottomGreen = 0;
+        var bottomBlue = 0;
+        var rowWidth = sceneSamplerCanvas.width;
 
         for (var index = 0; index < imageData.length; index += 4) {
           var r = imageData[index];
@@ -352,6 +394,21 @@
           green += g * weight;
           blue += b * weight;
           totalWeight += weight;
+
+          var pixelIndex = index / 4;
+          var row = Math.floor(pixelIndex / rowWidth);
+
+          if (row < sceneSamplerCanvas.height * 0.48) {
+            topRed += r * weight;
+            topGreen += g * weight;
+            topBlue += b * weight;
+            topWeight += weight;
+          } else {
+            bottomRed += r * weight;
+            bottomGreen += g * weight;
+            bottomBlue += b * weight;
+            bottomWeight += weight;
+          }
         }
 
         if (!totalWeight) {
@@ -359,6 +416,22 @@
         }
 
         setSceneTint([
+          Math.round(red / totalWeight),
+          Math.round(green / totalWeight),
+          Math.round(blue / totalWeight)
+        ], topWeight ? [
+          Math.round(topRed / topWeight),
+          Math.round(topGreen / topWeight),
+          Math.round(topBlue / topWeight)
+        ] : [
+          Math.round(red / totalWeight),
+          Math.round(green / totalWeight),
+          Math.round(blue / totalWeight)
+        ], bottomWeight ? [
+          Math.round(bottomRed / bottomWeight),
+          Math.round(bottomGreen / bottomWeight),
+          Math.round(bottomBlue / bottomWeight)
+        ] : [
           Math.round(red / totalWeight),
           Math.round(green / totalWeight),
           Math.round(blue / totalWeight)
