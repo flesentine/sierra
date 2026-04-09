@@ -1,0 +1,27 @@
+{
+    "short_name": "KQ3",
+    "name": "King's Quest III",
+    "icons": [
+      {
+        "src": "scummvm-192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "scummvm-512.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ],
+    "start_url": "game.html",
+    "background_color": "#120d23",
+    "display": "fullscreen",
+    "theme_color": "#120d23",
+    "shortcuts": [
+     
+    ],
+    "description": "King's Quest III running as a browser-hosted AGI adventure.",
+    "screenshots": [
+     
+    ]
+  }

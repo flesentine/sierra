@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="scummvm-192.png" />
+    <title>King's Quest III</title>
+    <style>
+      :root {
+        --bg-top: #150d28;
+        --bg-bottom: #040507;
+        --gold: #e3bb67;
+        --gold-dim: #8e6322;
+        --paper: #efe2bf;
+        --paper-dark: #3a2611;
+        --magenta: #d34cf0;
+        --scene-rgb: 84, 44, 126;
+        --scene-deep-rgb: 24, 12, 36;
+        --scene-border-rgb: 108, 68, 150;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top, rgba(var(--scene-rgb), 0.34), transparent 24%),
+          linear-gradient(180deg, rgb(var(--scene-deep-rgb)), var(--bg-bottom));
+        color: var(--paper);
+        font-family: Georgia, "Times New Roman", serif;
+        transition: background 480ms ease;
+      }
+
+      .loading-shell {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 1rem;
+      }
+
+      .loading-card {
+        position: relative;
+        width: min(1100px, 100%);
+        min-height: min(86vh, 760px);
+        overflow: hidden;
+        border: 1px solid rgba(var(--scene-border-rgb), 0.72);
+        border-radius: 28px;
+        background:
+          linear-gradient(180deg, rgba(12, 13, 20, 0.94), rgba(8, 6, 12, 0.97));
+        box-shadow:
+          0 24px 80px rgba(0, 0, 0, 0.45),
+          0 0 0 1px rgba(var(--scene-border-rgb), 0.18),
+          0 0 120px rgba(var(--scene-rgb), 0.12);
+        transition: border-color 480ms ease, box-shadow 480ms ease;
+      }
+
+      .loading-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          repeating-linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.02) 0,
+            rgba(255, 255, 255, 0.02) 2px,
+            transparent 2px,
+            transparent 6px
+          );
+        pointer-events: none;
+      }
+
+      #progress {
+        position: absolute;
+        inset: auto 1.35rem 1.2rem 1.35rem;
+        width: calc(100% - 2.7rem);
+        height: 10px;
+        z-index: 4;
+        border: 0;
+        background: rgba(88, 41, 11, 0.9);
+        overflow: hidden;
+        transition: opacity 220ms ease;
+      }
+
+      progress::-moz-progress-bar {
+        background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+      }
+
+      progress::-webkit-progress-value {
+        background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+      }
+
+      progress {
+        color: var(--gold);
+      }
+
+      #status {
+        position: absolute;
+        left: 1.35rem;
+        right: 1.35rem;
+        bottom: 2.35rem;
+        z-index: 4;
+        padding: 0.8rem 1rem;
+        border: 1px solid rgba(227, 187, 103, 0.28);
+        border-radius: 14px;
+        background: rgba(25, 13, 33, 0.9);
+        color: var(--paper);
+        font: 700 0.92rem/1.4 Georgia, "Times New Roman", serif;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        transition: opacity 220ms ease;
+      }
+
+      #status.error {
+        background: #7a1e22;
+      }
+
+      .emscripten_border {
+        position: absolute;
+        inset: 0;
+      }
+
+      .canvas-mask {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: grid;
+        place-items: center;
+        background:
+          radial-gradient(circle at top, rgba(211, 76, 240, 0.12), transparent 28%),
+          linear-gradient(180deg, #12071e, #05060a);
+        transition: opacity 260ms ease;
+      }
+
+      .mask-card {
+        width: min(880px, calc(100% - 4rem));
+        aspect-ratio: 4 / 3;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .mask-card p,
+      .mask-card h2 {
+        margin: 0;
+      }
+
+      .mask-eyebrow {
+        color: #d5c290;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-size: 0.78rem;
+        margin-bottom: 0.65rem;
+      }
+
+      .mask-card h2 {
+        color: var(--gold);
+        font-size: clamp(2.2rem, 5vw, 4.6rem);
+        line-height: 0.92;
+        text-shadow:
+          0 2px 0 #563200,
+          0 8px 26px rgba(0, 0, 0, 0.65);
+      }
+
+      .mask-copy {
+        margin-top: 0.7rem;
+        color: #f1dfbb;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-size: 0.82rem;
+      }
+
+      canvas.emscripten {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        border: 0;
+        background:
+          radial-gradient(circle at top, rgba(211, 76, 240, 0.08), transparent 28%),
+          linear-gradient(180deg, #080a11, #020304);
+        opacity: 0;
+        transition: opacity 260ms ease;
+      }
+
+      textarea.emscripten {
+        display: none;
+      }
+
+      .runtime-live #progress,
+      .runtime-live #status {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .runtime-live #status {
+        display: none;
+      }
+
+      .runtime-live canvas.emscripten {
+        opacity: 1;
+      }
+
+      .runtime-live .canvas-mask {
+        opacity: 0;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="loading-shell">
+      <section class="loading-card">
+        <progress hidden id="progress" max="100" value="0"></progress>
+        <div id="status">Summoning the adventure...</div>
+        <div class="emscripten_border">
+          <div class="canvas-mask" id="canvas-mask">
+            <div class="mask-card">
+              <div>
+                <p class="mask-eyebrow">Sierra Web Edition</p>
+                <h2>King's Quest III</h2>
+                <p class="mask-copy">Entering the Kingdom</p>
+              </div>
+            </div>
+          </div>
+          <canvas
+            class="emscripten"
+            id="canvas"
+            tabindex="-1"
+            oncontextmenu="event.preventDefault()"
+          ></canvas>
+        </div>
+        <textarea class="emscripten" id="output" rows="8"></textarea>
+      </section>
+    </main>
+    <script>
+      document.title = "King's Quest III";
+
+      var titleLock = window.setInterval(function () {
+        if (document.title !== "King's Quest III") {
+          document.title = "King's Quest III";
+        }
+      }, 250);
+
+      var statusElement = document.getElementById("status");
+      var progressElement = document.getElementById("progress");
+      var runtimeVersion = "20260409f";
+      var loadingCard = document.querySelector(".loading-card");
+      var bodyElement = document.body;
+      var gameUnlocked = false;
+      var unlockTimer = null;
+      var sceneSamplerTimer = null;
+      var sceneSamplerCanvas = document.createElement("canvas");
+      var sceneSamplerContext = sceneSamplerCanvas.getContext("2d", { willReadFrequently: true });
+
+      sceneSamplerCanvas.width = 40;
+      sceneSamplerCanvas.height = 25;
+
+      function loadingDoneMessage() {
+        document.getElementById("progress").style.zIndex = 0;
+        return "Entering the kingdom.";
+      }
+
+      function markRuntimeLive() {
+        loadingCard.classList.add("runtime-live");
+        startSceneSampling();
+        window.setTimeout(function () {
+          window.clearInterval(titleLock);
+          document.title = "King's Quest III";
+        }, 1500);
+      }
+
+      function setSceneTint(rgb) {
+        var deep = [
+          Math.max(6, Math.round(rgb[0] * 0.22)),
+          Math.max(6, Math.round(rgb[1] * 0.22)),
+          Math.max(8, Math.round(rgb[2] * 0.26))
+        ];
+        var border = [
+          Math.min(255, Math.round(rgb[0] * 0.82 + 22)),
+          Math.min(255, Math.round(rgb[1] * 0.82 + 22)),
+          Math.min(255, Math.round(rgb[2] * 0.82 + 22))
+        ];
+
+        bodyElement.style.setProperty("--scene-rgb", rgb.join(", "));
+        bodyElement.style.setProperty("--scene-deep-rgb", deep.join(", "));
+        bodyElement.style.setProperty("--scene-border-rgb", border.join(", "));
+      }
+
+      function sampleSceneTint() {
+        var canvas = Module.canvas;
+        if (!canvas || !canvas.width || !canvas.height) {
+          return;
+        }
+
+        var sourceWidth = canvas.width;
+        var sourceHeight = canvas.height;
+        var cropTop = Math.max(8, Math.floor(sourceHeight * 0.11));
+        var cropHeight = Math.max(1, sourceHeight - cropTop);
+
+        sceneSamplerContext.drawImage(
+          canvas,
+          0,
+          cropTop,
+          sourceWidth,
+          cropHeight,
+          0,
+          0,
+          sceneSamplerCanvas.width,
+          sceneSamplerCanvas.height
+        );
+
+        var imageData = sceneSamplerContext.getImageData(
+          0,
+          0,
+          sceneSamplerCanvas.width,
+          sceneSamplerCanvas.height
+        ).data;
+
+        var totalWeight = 0;
+        var red = 0;
+        var green = 0;
+        var blue = 0;
+
+        for (var index = 0; index < imageData.length; index += 4) {
+          var r = imageData[index];
+          var g = imageData[index + 1];
+          var b = imageData[index + 2];
+          var alpha = imageData[index + 3];
+
+          if (alpha < 32) {
+            continue;
+          }
+
+          var brightness = r + g + b;
+          if (brightness < 26) {
+            continue;
+          }
+
+          var saturation = Math.max(r, g, b) - Math.min(r, g, b);
+          var weight = 1 + saturation / 96 + brightness / 420;
+
+          red += r * weight;
+          green += g * weight;
+          blue += b * weight;
+          totalWeight += weight;
+        }
+
+        if (!totalWeight) {
+          return;
+        }
+
+        setSceneTint([
+          Math.round(red / totalWeight),
+          Math.round(green / totalWeight),
+          Math.round(blue / totalWeight)
+        ]);
+      }
+
+      function startSceneSampling() {
+        if (sceneSamplerTimer !== null) {
+          return;
+        }
+
+        sampleSceneTint();
+        sceneSamplerTimer = window.setInterval(sampleSceneTint, 1400);
+      }
+
+      function unlockGameView() {
+        if (gameUnlocked) {
+          return;
+        }
+        gameUnlocked = true;
+        markRuntimeLive();
+      }
+
+      function scheduleUnlock(delayMs) {
+        if (gameUnlocked) {
+          return;
+        }
+        if (unlockTimer !== null) {
+          return;
+        }
+        unlockTimer = window.setTimeout(function () {
+          unlockTimer = null;
+          unlockGameView();
+        }, delayMs);
+      }
+
+      var Module = {
+        preRun: [],
+        postRun: [],
+        dataVersion: runtimeVersion,
+        print: function () {
+          var element = document.getElementById("output");
+          if (element) {
+            element.value = "";
+          }
+          return function (text) {
+            if (arguments.length > 1) {
+              text = Array.prototype.slice.call(arguments).join(" ");
+            }
+            console.log(text);
+            if (element) {
+              element.value += text + "\n";
+              element.scrollTop = element.scrollHeight;
+            }
+            if (typeof text === "string" && (text.indexOf("Running King's Quest III") !== -1 || text.indexOf("AGI: Using PC-BIOS font") !== -1 || text.indexOf("Emulating Sierra AGI") !== -1)) {
+              scheduleUnlock(1800);
+            }
+          };
+        }(),
+        printErr: function (text) {
+          if (arguments.length > 1) {
+            text = Array.prototype.slice.call(arguments).join(" ");
+          }
+          console.error(text);
+        },
+        canvas: function () {
+          var canvas = document.getElementById("canvas");
+          canvas.addEventListener(
+            "webglcontextlost",
+            function (event) {
+              alert("WebGL context lost. You will need to reload the page.");
+              event.preventDefault();
+            },
+            false
+          );
+          return canvas;
+        }(),
+        locateFile: function (path, prefix) {
+          if (path.endsWith(".wasm")) {
+            return prefix + path + "?v=" + runtimeVersion;
+          }
+          return prefix + path;
+        },
+        setStatus: function (text) {
+          if (!Module.setStatus.last) {
+            Module.setStatus.last = { time: Date.now(), text: "" };
+          }
+          if (text === Module.setStatus.last.text) {
+            return;
+          }
+
+          var match = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+          var now = Date.now();
+          if (match && now - Module.setStatus.last.time < 30) {
+            return;
+          }
+
+          Module.setStatus.last.time = now;
+          Module.setStatus.last.text = text;
+
+          if (match) {
+            text = match[1];
+            progressElement.value = 100 * parseInt(match[2], 10);
+            progressElement.max = 100 * parseInt(match[4], 10);
+            progressElement.hidden = false;
+          } else {
+            progressElement.value = null;
+            progressElement.max = null;
+            progressElement.hidden = true;
+          }
+
+          if (text && text.length > 0) {
+            console.log(new Date().toLocaleTimeString() + " " + text);
+            statusElement.style.display = "block";
+          } else {
+            statusElement.style.display = "none";
+          }
+
+          statusElement.textContent = text;
+        },
+        totalDependencies: 0,
+        monitorRunDependencies: function (left) {
+          this.totalDependencies = Math.max(this.totalDependencies, left);
+          Module.setStatus(
+            left
+              ? "Preparing... (" + (this.totalDependencies - left) + "/" + this.totalDependencies + ")"
+              : loadingDoneMessage()
+          );
+        }
+      };
+
+      Module.setStatus("Summoning the adventure...");
+      window.onerror = function () {
+        statusElement.classList.add("error");
+        Module.setStatus("A miscast spell struck the runtime. See the console.");
+        Module.setStatus = function (text) {
+          if (text) {
+            Module.printErr("[post-exception status] " + text);
+          }
+        };
+      };
+    </script>
+    <script async src="scummvm.js?v=20260409f"></script>
+  </body>
+</html>

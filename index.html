@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>King's Quest III</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="landing-body">
+    <main class="landing-shell">
+      <section class="title-card">
+        <p class="eyebrow">Sierra Web Edition</p>
+        <h1>King's Quest III</h1>
+        <p class="subtitle">To Heir Is Human</p>
+        <p class="intro-copy">
+          A faithful browser edition of the original AGI adventure, now opened
+          through a hand-built Sierra-style frontispiece.
+        </p>
+      </section>
+
+      <section class="adventure-panel">
+        <div class="portrait-column">
+          <div class="portrait-frame">
+            <canvas
+              class="hero-portrait pixel-portrait"
+              id="portrait-canvas"
+              width="160"
+              height="200"
+              aria-label="AGI-style portrait featured on the King's Quest III landing page"
+              role="img"
+            ></canvas>
+            <img
+              class="source-portrait"
+              id="source-portrait"
+              src="./me.jpg"
+              alt=""
+              hidden
+            />
+          </div>
+          <p class="portrait-caption">The Hero Awaits His Quest</p>
+        </div>
+
+        <div class="story-column">
+          <div class="story-panel">
+            <p class="story-kicker">Tonight's Adventure</p>
+            <p class="story-text">
+              The castle stands, the spellbook waits, and the road to Llewdor
+              begins with a single command. Enter the tale through the old
+              Sierra gate and let the kingdom decide the rest.
+            </p>
+            <div class="launch-row">
+              <a
+                class="begin-button"
+                id="begin-button"
+                href="./game.html?v=20260409f#--path=/data/games/kq3%20kq3"
+              >
+                Begin Quest
+              </a>
+              <p class="launch-note">Best viewed as a normal hosted website.</p>
+            </div>
+          </div>
+          <div class="status-panel">
+            <p class="version">Runtime: Browser AGI Edition</p>
+            <p class="status" id="status">Preparing the kingdom...</p>
+            <p id="file-warning" hidden>
+              This page needs to be opened over <code>http://</code> or
+              <code>https://</code>. Browsers block the game runtime from
+              starting directly from <code>file://</code>.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+      const runtimeVersion = "20260409f";
+      const gameUrl = `./game.html?v=${runtimeVersion}#--path=/data/games/kq3%20kq3`;
+      const status = document.getElementById("status");
+      const fileWarning = document.getElementById("file-warning");
+      const beginButton = document.getElementById("begin-button");
+      const portraitCanvas = document.getElementById("portrait-canvas");
+      const portraitImage = document.getElementById("source-portrait");
+
+      beginButton.href = gameUrl;
+
+      function drawPortrait() {
+        const palette = [
+          [0, 0, 0],
+          [0, 0, 170],
+          [0, 170, 0],
+          [0, 170, 170],
+          [170, 0, 0],
+          [170, 0, 170],
+          [170, 85, 0],
+          [170, 170, 170],
+          [85, 85, 85],
+          [85, 85, 255],
+          [85, 255, 85],
+          [85, 255, 255],
+          [255, 85, 85],
+          [255, 85, 255],
+          [255, 255, 85],
+          [255, 255, 255]
+        ];
+
+        const ctx = portraitCanvas.getContext("2d", { alpha: false });
+        const workCanvas = document.createElement("canvas");
+        workCanvas.width = 80;
+        workCanvas.height = 100;
+        const workCtx = workCanvas.getContext("2d", { alpha: false });
+
+        workCtx.fillStyle = "#000";
+        workCtx.fillRect(0, 0, workCanvas.width, workCanvas.height);
+
+        const sourceWidth = portraitImage.naturalWidth;
+        const sourceHeight = portraitImage.naturalHeight;
+        const scale = Math.max(workCanvas.width / sourceWidth, workCanvas.height / sourceHeight);
+        const drawWidth = sourceWidth * scale;
+        const drawHeight = sourceHeight * scale;
+        const dx = (workCanvas.width - drawWidth) / 2;
+        const dy = (workCanvas.height - drawHeight) / 2 - 6;
+
+        workCtx.imageSmoothingEnabled = true;
+        workCtx.drawImage(portraitImage, dx, dy, drawWidth, drawHeight);
+
+        const imageData = workCtx.getImageData(0, 0, workCanvas.width, workCanvas.height);
+        const data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+          let bestIndex = 0;
+          let bestDistance = Number.POSITIVE_INFINITY;
+
+          for (let j = 0; j < palette.length; j += 1) {
+            const [pr, pg, pb] = palette[j];
+            const dr = data[i] - pr;
+            const dg = data[i + 1] - pg;
+            const db = data[i + 2] - pb;
+            const distance = dr * dr + dg * dg + db * db;
+
+            if (distance < bestDistance) {
+              bestDistance = distance;
+              bestIndex = j;
+            }
+          }
+
+          const [r, g, b] = palette[bestIndex];
+          data[i] = r;
+          data[i + 1] = g;
+          data[i + 2] = b;
+          data[i + 3] = 255;
+        }
+
+        workCtx.putImageData(imageData, 0, 0);
+
+        ctx.imageSmoothingEnabled = false;
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, portraitCanvas.width, portraitCanvas.height);
+        ctx.drawImage(workCanvas, 0, 0, portraitCanvas.width, portraitCanvas.height);
+      }
+
+      portraitImage.addEventListener("load", drawPortrait);
+      if (portraitImage.complete) {
+        drawPortrait();
+      }
+
+      if (window.location.protocol === "file:") {
+        status.textContent = "Awaiting a proper web host.";
+        fileWarning.hidden = false;
+      } else {
+        status.textContent = "The quest is ready.";
+      }
+    </script>
+  </body>
+</html>
