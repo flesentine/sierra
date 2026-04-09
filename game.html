@@ -64,7 +64,7 @@
           linear-gradient(180deg, rgb(var(--scene-deep-rgb)), var(--bg-bottom));
         color: var(--paper);
         font-family: Georgia, "Times New Roman", serif;
-        transition: background 140ms linear;
+        transition: background 70ms linear;
       }
 
       .loading-shell {
@@ -95,7 +95,7 @@
           -24px 20px 68px rgba(var(--scene-bottom-left-rgb), 0.16),
           24px 20px 68px rgba(var(--scene-bottom-right-rgb), 0.16),
           0 0 128px rgba(var(--scene-rgb), 0.08);
-        transition: border-color 140ms linear, box-shadow 140ms linear;
+        transition: border-color 70ms linear, box-shadow 70ms linear;
       }
 
       .loading-card::before {
@@ -343,6 +343,9 @@
       var gameUnlocked = false;
       var unlockTimer = null;
       var sceneSamplerTimer = null;
+      var sceneAnimatorFrame = null;
+      var sceneCurrentState = null;
+      var sceneTargetState = null;
       var sceneSamplerCanvas = document.createElement("canvas");
       var sceneSamplerContext = sceneSamplerCanvas.getContext("2d", { willReadFrequently: true });
 
@@ -400,6 +403,88 @@
         ];
       }
 
+      function maxChannelDelta(left, right) {
+        return Math.max(
+          Math.abs(left[0] - right[0]),
+          Math.abs(left[1] - right[1]),
+          Math.abs(left[2] - right[2])
+        );
+      }
+
+      function lerpColor(from, to, amount) {
+        return [
+          Math.round(from[0] + (to[0] - from[0]) * amount),
+          Math.round(from[1] + (to[1] - from[1]) * amount),
+          Math.round(from[2] + (to[2] - from[2]) * amount)
+        ];
+      }
+
+      function applySceneState(state) {
+        bodyElement.style.setProperty("--scene-rgb", state.scene.join(", "));
+        bodyElement.style.setProperty("--scene-deep-rgb", state.deep.join(", "));
+        bodyElement.style.setProperty("--scene-border-rgb", state.border.join(", "));
+        bodyElement.style.setProperty("--scene-top-rgb", state.top.join(", "));
+        bodyElement.style.setProperty("--scene-bottom-rgb", state.bottom.join(", "));
+        bodyElement.style.setProperty("--scene-left-rgb", state.left.join(", "));
+        bodyElement.style.setProperty("--scene-right-rgb", state.right.join(", "));
+        bodyElement.style.setProperty("--scene-top-left-rgb", state.topLeft.join(", "));
+        bodyElement.style.setProperty("--scene-top-right-rgb", state.topRight.join(", "));
+        bodyElement.style.setProperty("--scene-bottom-left-rgb", state.bottomLeft.join(", "));
+        bodyElement.style.setProperty("--scene-bottom-right-rgb", state.bottomRight.join(", "));
+        for (var edgeIndex = 0; edgeIndex < state.edges.length; edgeIndex += 1) {
+          bodyElement.style.setProperty("--edge-" + edgeIndex + "-rgb", state.edges[edgeIndex].join(", "));
+        }
+      }
+
+      function animateSceneTint() {
+        if (!sceneCurrentState || !sceneTargetState) {
+          sceneAnimatorFrame = null;
+          return;
+        }
+
+        var nextState = { edges: [] };
+        var keys = [
+          "scene",
+          "deep",
+          "border",
+          "top",
+          "bottom",
+          "left",
+          "right",
+          "topLeft",
+          "topRight",
+          "bottomLeft",
+          "bottomRight"
+        ];
+        var settled = true;
+
+        for (var keyIndex = 0; keyIndex < keys.length; keyIndex += 1) {
+          var key = keys[keyIndex];
+          nextState[key] = lerpColor(sceneCurrentState[key], sceneTargetState[key], 0.34);
+          if (maxChannelDelta(nextState[key], sceneTargetState[key]) > 3) {
+            settled = false;
+          }
+        }
+
+        for (var edgeStateIndex = 0; edgeStateIndex < sceneTargetState.edges.length; edgeStateIndex += 1) {
+          var edgeColor = lerpColor(sceneCurrentState.edges[edgeStateIndex], sceneTargetState.edges[edgeStateIndex], 0.42);
+          nextState.edges.push(edgeColor);
+          if (maxChannelDelta(edgeColor, sceneTargetState.edges[edgeStateIndex]) > 4) {
+            settled = false;
+          }
+        }
+
+        sceneCurrentState = settled ? sceneTargetState : nextState;
+        applySceneState(sceneCurrentState);
+
+        if (settled) {
+          sceneAnimatorFrame = null;
+          return;
+        }
+
+        sceneAnimatorFrame = window.requestAnimationFrame(animateSceneTint);
+      }
+
       function setSceneTint(rgb, edgeRegions) {
         var topLeftRgb = averageColors([edgeRegions[15], edgeRegions[0]]);
         var topRgb = averageColors([edgeRegions[0], edgeRegions[1], edgeRegions[2], edgeRegions[3]]);
@@ -423,21 +508,34 @@
         var topRight = saturateColor(blendColor(topRightRgb, 1.18, 18, [28, 30, 76]), 1.65, [28, 30, 76]);
         var bottomLeft = saturateColor(blendColor(bottomLeftRgb, 1.02, 18, [28, 34, 24]), 1.42, [28, 34, 24]);
         var bottomRight = saturateColor(blendColor(bottomRightRgb, 1.06, 16, [38, 24, 18]), 1.5, [38, 24, 18]);
-
-        bodyElement.style.setProperty("--scene-rgb", rgb.join(", "));
-        bodyElement.style.setProperty("--scene-deep-rgb", deep.join(", "));
-        bodyElement.style.setProperty("--scene-border-rgb", border.join(", "));
-        bodyElement.style.setProperty("--scene-top-rgb", top.join(", "));
-        bodyElement.style.setProperty("--scene-bottom-rgb", bottom.join(", "));
-        bodyElement.style.setProperty("--scene-left-rgb", left.join(", "));
-        bodyElement.style.setProperty("--scene-right-rgb", right.join(", "));
-        bodyElement.style.setProperty("--scene-top-left-rgb", topLeft.join(", "));
-        bodyElement.style.setProperty("--scene-top-right-rgb", topRight.join(", "));
-        bodyElement.style.setProperty("--scene-bottom-left-rgb", bottomLeft.join(", "));
-        bodyElement.style.setProperty("--scene-bottom-right-rgb", bottomRight.join(", "));
+        var vividEdges = [];
         for (var edgeIndex = 0; edgeIndex < edgeRegions.length; edgeIndex += 1) {
-          var vividEdge = saturateColor(edgeRegions[edgeIndex], 1.9, [22, 22, 22]);
-          bodyElement.style.setProperty("--edge-" + edgeIndex + "-rgb", vividEdge.join(", "));
+          vividEdges.push(saturateColor(edgeRegions[edgeIndex], 1.9, [22, 22, 22]));
+        }
+
+        sceneTargetState = {
+          scene: rgb,
+          deep: deep,
+          border: border,
+          top: top,
+          bottom: bottom,
+          left: left,
+          right: right,
+          topLeft: topLeft,
+          topRight: topRight,
+          bottomLeft: bottomLeft,
+          bottomRight: bottomRight,
+          edges: vividEdges
+        };
+
+        if (!sceneCurrentState) {
+          sceneCurrentState = sceneTargetState;
+          applySceneState(sceneCurrentState);
+          return;
+        }
+
+        if (sceneAnimatorFrame === null) {
+          sceneAnimatorFrame = window.requestAnimationFrame(animateSceneTint);
         }
       }
 
@@ -640,7 +738,7 @@
         }
 
         sampleSceneTint();
-        sceneSamplerTimer = window.setInterval(sampleSceneTint, 180);
+        sceneSamplerTimer = window.setInterval(sampleSceneTint, 80);
       }
 
       function unlockGameView() {
