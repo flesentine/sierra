@@ -27,18 +27,22 @@
         --scene-bottom-left-rgb: 104, 120, 108;
         --scene-bottom-right-rgb: 170, 98, 44;
         --scene-border-rgb: 108, 68, 150;
-        --edge-0-rgb: 94, 90, 212;
-        --edge-1-rgb: 90, 96, 224;
-        --edge-2-rgb: 104, 96, 216;
-        --edge-3-rgb: 126, 90, 204;
-        --edge-4-rgb: 118, 88, 190;
-        --edge-5-rgb: 154, 92, 48;
-        --edge-6-rgb: 170, 98, 44;
-        --edge-7-rgb: 160, 100, 40;
-        --edge-8-rgb: 124, 108, 70;
-        --edge-9-rgb: 96, 122, 102;
-        --edge-10-rgb: 82, 108, 170;
-        --edge-11-rgb: 88, 98, 196;
+        --edge-0-rgb: 98, 94, 220;
+        --edge-1-rgb: 88, 102, 232;
+        --edge-2-rgb: 94, 106, 236;
+        --edge-3-rgb: 110, 100, 224;
+        --edge-4-rgb: 124, 92, 204;
+        --edge-5-rgb: 132, 88, 182;
+        --edge-6-rgb: 164, 94, 64;
+        --edge-7-rgb: 178, 102, 46;
+        --edge-8-rgb: 174, 102, 40;
+        --edge-9-rgb: 154, 108, 48;
+        --edge-10-rgb: 116, 122, 82;
+        --edge-11-rgb: 96, 134, 118;
+        --edge-12-rgb: 78, 128, 170;
+        --edge-13-rgb: 78, 114, 192;
+        --edge-14-rgb: 84, 104, 210;
+        --edge-15-rgb: 92, 98, 220;
       }
 
       * {
@@ -48,12 +52,14 @@
       body {
         margin: 0;
         background:
-          radial-gradient(circle at 16% 50%, rgba(var(--scene-left-rgb), 0.2), transparent 26%),
-          radial-gradient(circle at 84% 50%, rgba(var(--scene-right-rgb), 0.2), transparent 26%),
-          radial-gradient(circle at 24% 18%, rgba(var(--scene-top-left-rgb), 0.2), transparent 20%),
-          radial-gradient(circle at 76% 18%, rgba(var(--scene-top-right-rgb), 0.2), transparent 20%),
-          radial-gradient(circle at 28% 84%, rgba(var(--scene-bottom-left-rgb), 0.12), transparent 18%),
-          radial-gradient(circle at 72% 84%, rgba(var(--scene-bottom-right-rgb), 0.12), transparent 18%),
+          radial-gradient(circle at 18% 48%, rgba(var(--scene-left-rgb), 0.26), transparent 28%),
+          radial-gradient(circle at 82% 48%, rgba(var(--scene-right-rgb), 0.26), transparent 28%),
+          radial-gradient(circle at 20% 16%, rgba(var(--scene-top-left-rgb), 0.24), transparent 20%),
+          radial-gradient(circle at 38% 12%, rgba(var(--edge-1-rgb), 0.2), transparent 16%),
+          radial-gradient(circle at 62% 12%, rgba(var(--edge-2-rgb), 0.2), transparent 16%),
+          radial-gradient(circle at 80% 16%, rgba(var(--scene-top-right-rgb), 0.24), transparent 20%),
+          radial-gradient(circle at 28% 84%, rgba(var(--scene-bottom-left-rgb), 0.14), transparent 18%),
+          radial-gradient(circle at 72% 84%, rgba(var(--scene-bottom-right-rgb), 0.14), transparent 18%),
           radial-gradient(circle at top, rgba(var(--scene-rgb), 0.22), transparent 24%),
           linear-gradient(180deg, rgb(var(--scene-deep-rgb)), var(--bg-bottom));
         color: var(--paper);
@@ -79,15 +85,15 @@
           linear-gradient(180deg, rgba(12, 13, 20, 0.94), rgba(8, 6, 12, 0.97));
         box-shadow:
           0 24px 80px rgba(0, 0, 0, 0.45),
-          0 0 0 1px rgba(var(--scene-border-rgb), 0.18),
-          -30px 0 90px rgba(var(--scene-left-rgb), 0.18),
-          30px 0 90px rgba(var(--scene-right-rgb), 0.18),
-          0 -14px 72px rgba(var(--scene-top-rgb), 0.28),
-          0 20px 76px rgba(var(--scene-bottom-rgb), 0.18),
-          -20px -14px 62px rgba(var(--scene-top-left-rgb), 0.18),
-          20px -14px 62px rgba(var(--scene-top-right-rgb), 0.18),
-          -20px 18px 62px rgba(var(--scene-bottom-left-rgb), 0.14),
-          20px 18px 62px rgba(var(--scene-bottom-right-rgb), 0.14),
+          0 0 0 1px rgba(var(--scene-border-rgb), 0.22),
+          -34px 0 96px rgba(var(--scene-left-rgb), 0.22),
+          34px 0 96px rgba(var(--scene-right-rgb), 0.22),
+          0 -16px 84px rgba(var(--scene-top-rgb), 0.34),
+          0 22px 80px rgba(var(--scene-bottom-rgb), 0.2),
+          -24px -16px 68px rgba(var(--scene-top-left-rgb), 0.22),
+          24px -16px 68px rgba(var(--scene-top-right-rgb), 0.22),
+          -24px 20px 68px rgba(var(--scene-bottom-left-rgb), 0.16),
+          24px 20px 68px rgba(var(--scene-bottom-right-rgb), 0.16),
           0 0 128px rgba(var(--scene-rgb), 0.08);
         transition: border-color 480ms ease, box-shadow 480ms ease;
       }
@@ -116,19 +122,23 @@
         background:
           conic-gradient(
             from 180deg at 50% 50%,
-            rgba(var(--edge-11-rgb), 0.92) 0deg,
-            rgba(var(--edge-10-rgb), 0.9) 30deg,
-            rgba(var(--edge-9-rgb), 0.88) 60deg,
-            rgba(var(--edge-8-rgb), 0.86) 90deg,
-            rgba(var(--edge-7-rgb), 0.88) 120deg,
-            rgba(var(--edge-6-rgb), 0.9) 150deg,
-            rgba(var(--edge-5-rgb), 0.92) 180deg,
-            rgba(var(--edge-4-rgb), 0.9) 210deg,
-            rgba(var(--edge-3-rgb), 0.9) 240deg,
-            rgba(var(--edge-2-rgb), 0.92) 270deg,
-            rgba(var(--edge-1-rgb), 0.94) 300deg,
-            rgba(var(--edge-0-rgb), 0.94) 330deg,
-            rgba(var(--edge-11-rgb), 0.92) 360deg
+            rgba(var(--edge-15-rgb), 0.96) 0deg,
+            rgba(var(--edge-14-rgb), 0.95) 22deg,
+            rgba(var(--edge-13-rgb), 0.94) 45deg,
+            rgba(var(--edge-12-rgb), 0.92) 67deg,
+            rgba(var(--edge-11-rgb), 0.9) 90deg,
+            rgba(var(--edge-10-rgb), 0.88) 112deg,
+            rgba(var(--edge-9-rgb), 0.88) 135deg,
+            rgba(var(--edge-8-rgb), 0.9) 157deg,
+            rgba(var(--edge-7-rgb), 0.94) 180deg,
+            rgba(var(--edge-6-rgb), 0.92) 202deg,
+            rgba(var(--edge-5-rgb), 0.9) 225deg,
+            rgba(var(--edge-4-rgb), 0.92) 247deg,
+            rgba(var(--edge-3-rgb), 0.95) 270deg,
+            rgba(var(--edge-2-rgb), 0.98) 292deg,
+            rgba(var(--edge-1-rgb), 0.98) 315deg,
+            rgba(var(--edge-0-rgb), 0.97) 337deg,
+            rgba(var(--edge-15-rgb), 0.96) 360deg
           );
         -webkit-mask:
           linear-gradient(#000 0 0) content-box,
@@ -380,14 +390,14 @@
       }
 
       function setSceneTint(rgb, edgeRegions) {
-        var topLeftRgb = averageColors([edgeRegions[11], edgeRegions[0]]);
+        var topLeftRgb = averageColors([edgeRegions[15], edgeRegions[0]]);
         var topRgb = averageColors([edgeRegions[0], edgeRegions[1], edgeRegions[2], edgeRegions[3]]);
         var topRightRgb = averageColors([edgeRegions[3], edgeRegions[4]]);
-        var rightRgb = averageColors([edgeRegions[4], edgeRegions[5]]);
-        var bottomRightRgb = averageColors([edgeRegions[5], edgeRegions[6]]);
-        var bottomRgb = averageColors([edgeRegions[6], edgeRegions[7], edgeRegions[8], edgeRegions[9]]);
-        var bottomLeftRgb = averageColors([edgeRegions[8], edgeRegions[9]]);
-        var leftRgb = averageColors([edgeRegions[10], edgeRegions[11]]);
+        var rightRgb = averageColors([edgeRegions[4], edgeRegions[5], edgeRegions[6], edgeRegions[7]]);
+        var bottomRightRgb = averageColors([edgeRegions[7], edgeRegions[8]]);
+        var bottomRgb = averageColors([edgeRegions[8], edgeRegions[9], edgeRegions[10], edgeRegions[11]]);
+        var bottomLeftRgb = averageColors([edgeRegions[11], edgeRegions[12]]);
+        var leftRgb = averageColors([edgeRegions[12], edgeRegions[13], edgeRegions[14], edgeRegions[15]]);
         var deep = [
           Math.max(6, Math.round(rgb[0] * 0.22)),
           Math.max(6, Math.round(rgb[1] * 0.22)),
@@ -460,20 +470,10 @@
           return { weight: 0, red: 0, green: 0, blue: 0 };
         }
 
-        var buckets = {
-          top0: createBucket(),
-          top1: createBucket(),
-          top2: createBucket(),
-          top3: createBucket(),
-          right0: createBucket(),
-          right1: createBucket(),
-          bottom3: createBucket(),
-          bottom2: createBucket(),
-          bottom1: createBucket(),
-          bottom0: createBucket(),
-          left1: createBucket(),
-          left0: createBucket()
-        };
+        var buckets = [];
+        for (var bucketIndex = 0; bucketIndex < 16; bucketIndex += 1) {
+          buckets.push(createBucket());
+        }
 
         function addToBucket(bucket, r, g, b, weight) {
           bucket.red += r * weight;
@@ -544,14 +544,14 @@
 
         var contentWidth = Math.max(1, contentRight - contentLeft + 1);
         var contentHeight = Math.max(1, contentBottom - contentTop + 1);
-        var edgeThicknessX = Math.max(2, Math.floor(contentWidth * 0.14));
-        var edgeThicknessY = Math.max(2, Math.floor(contentHeight * 0.16));
+        var edgeThicknessX = Math.max(2, Math.floor(contentWidth * 0.12));
+        var edgeThicknessY = Math.max(2, Math.floor(contentHeight * 0.14));
         var topBand = normalizeRange(contentTop, contentTop + edgeThicknessY - 1, rowHeight);
         var bottomBand = normalizeRange(contentBottom - edgeThicknessY + 1, contentBottom, rowHeight);
         var leftBand = normalizeRange(contentLeft, contentLeft + edgeThicknessX - 1, rowWidth);
         var rightBand = normalizeRange(contentRight - edgeThicknessX + 1, contentRight, rowWidth);
-        var topQuarter = Math.max(1, Math.floor(contentWidth / 4));
-        var sideHalf = Math.max(1, Math.floor(contentHeight / 2));
+        var topSegmentWidth = Math.max(1, Math.floor(contentWidth / 4));
+        var sideSegmentHeight = Math.max(1, Math.floor(contentHeight / 4));
 
         for (var index = 0; index < imageData.length; index += 4) {
           var r = imageData[index];
@@ -580,47 +580,25 @@
           var row = Math.floor(pixelIndex / rowWidth);
           var column = pixelIndex % rowWidth;
           if (row >= topBand.start && row <= topBand.end) {
-            var topIndex = Math.min(3, Math.floor((column - contentLeft) / topQuarter));
+            var topIndex = Math.min(3, Math.floor((column - contentLeft) / topSegmentWidth));
             if (column >= contentLeft && column <= contentRight) {
-              if (topIndex === 0) {
-                addToBucket(buckets.top0, r, g, b, weight * 1.45);
-              } else if (topIndex === 1) {
-                addToBucket(buckets.top1, r, g, b, weight * 1.55);
-              } else if (topIndex === 2) {
-                addToBucket(buckets.top2, r, g, b, weight * 1.55);
-              } else {
-                addToBucket(buckets.top3, r, g, b, weight * 1.45);
-              }
+              addToBucket(buckets[topIndex], r, g, b, weight * (topIndex === 1 || topIndex === 2 ? 1.7 : 1.55));
             }
           }
 
           if (column >= leftBand.start && column <= leftBand.end && row >= contentTop && row <= contentBottom) {
-            if (row - contentTop < sideHalf) {
-              addToBucket(buckets.left0, r, g, b, weight * 1.18);
-            } else {
-              addToBucket(buckets.left1, r, g, b, weight * 1.08);
-            }
+            var leftIndex = Math.min(3, Math.floor((row - contentTop) / sideSegmentHeight));
+            addToBucket(buckets[12 + leftIndex], r, g, b, weight * (leftIndex === 0 ? 1.28 : 1.14));
           }
 
           if (column >= rightBand.start && column <= rightBand.end && row >= contentTop && row <= contentBottom) {
-            if (row - contentTop < sideHalf) {
-              addToBucket(buckets.right0, r, g, b, weight * 1.18);
-            } else {
-              addToBucket(buckets.right1, r, g, b, weight * 1.08);
-            }
+            var rightIndex = Math.min(3, Math.floor((row - contentTop) / sideSegmentHeight));
+            addToBucket(buckets[4 + rightIndex], r, g, b, weight * (rightIndex === 0 ? 1.28 : 1.14));
           }
 
           if (row >= bottomBand.start && row <= bottomBand.end && column >= contentLeft && column <= contentRight) {
-            var bottomIndex = Math.min(3, Math.floor((column - contentLeft) / topQuarter));
-            if (bottomIndex === 0) {
-              addToBucket(buckets.bottom0, r, g, b, weight * 1.06);
-            } else if (bottomIndex === 1) {
-              addToBucket(buckets.bottom1, r, g, b, weight * 1.12);
-            } else if (bottomIndex === 2) {
-              addToBucket(buckets.bottom2, r, g, b, weight * 1.12);
-            } else {
-              addToBucket(buckets.bottom3, r, g, b, weight * 1.06);
-            }
+            var bottomIndex = Math.min(3, Math.floor((column - contentLeft) / topSegmentWidth));
+            addToBucket(buckets[8 + (3 - bottomIndex)], r, g, b, weight * (bottomIndex === 1 || bottomIndex === 2 ? 1.18 : 1.08));
           }
         }
 
@@ -633,20 +611,9 @@
           Math.round(green / totalWeight),
           Math.round(blue / totalWeight)
         ];
-        var edgeRegions = [
-          readBucket(buckets.top0, fallback),
-          readBucket(buckets.top1, fallback),
-          readBucket(buckets.top2, fallback),
-          readBucket(buckets.top3, fallback),
-          readBucket(buckets.right0, fallback),
-          readBucket(buckets.right1, fallback),
-          readBucket(buckets.bottom3, fallback),
-          readBucket(buckets.bottom2, fallback),
-          readBucket(buckets.bottom1, fallback),
-          readBucket(buckets.bottom0, fallback),
-          readBucket(buckets.left1, fallback),
-          readBucket(buckets.left0, fallback)
-        ];
+        var edgeRegions = buckets.map(function (bucket) {
+          return readBucket(bucket, fallback);
+        });
 
         setSceneTint([
           Math.round(red / totalWeight),
