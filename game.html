@@ -64,7 +64,7 @@
           linear-gradient(180deg, rgb(var(--scene-deep-rgb)), var(--bg-bottom));
         color: var(--paper);
         font-family: Georgia, "Times New Roman", serif;
-        transition: background 480ms ease;
+        transition: background 140ms linear;
       }
 
       .loading-shell {
@@ -95,7 +95,7 @@
           -24px 20px 68px rgba(var(--scene-bottom-left-rgb), 0.16),
           24px 20px 68px rgba(var(--scene-bottom-right-rgb), 0.16),
           0 0 128px rgba(var(--scene-rgb), 0.08);
-        transition: border-color 480ms ease, box-shadow 480ms ease;
+        transition: border-color 140ms linear, box-shadow 140ms linear;
       }
 
       .loading-card::before {
@@ -371,6 +371,17 @@
         ];
       }
 
+      function saturateColor(rgb, boost, floor) {
+        var max = Math.max(rgb[0], rgb[1], rgb[2]);
+        var min = Math.min(rgb[0], rgb[1], rgb[2]);
+        var midpoint = (max + min) / 2;
+        return [
+          Math.max(floor[0], Math.min(255, Math.round(midpoint + (rgb[0] - midpoint) * boost))),
+          Math.max(floor[1], Math.min(255, Math.round(midpoint + (rgb[1] - midpoint) * boost))),
+          Math.max(floor[2], Math.min(255, Math.round(midpoint + (rgb[2] - midpoint) * boost)))
+        ];
+      }
+
       function averageColors(colors) {
         var red = 0;
         var green = 0;
@@ -403,15 +414,15 @@
           Math.max(6, Math.round(rgb[1] * 0.22)),
           Math.max(8, Math.round(rgb[2] * 0.26))
         ];
-        var border = blendColor(rgb, 0.86, 24, [24, 24, 30]);
-        var top = blendColor(topRgb, 1.08, 18, [28, 30, 56]);
-        var bottom = blendColor(bottomRgb, 0.94, 12, [32, 24, 18]);
-        var left = blendColor(leftRgb, 1.04, 16, [24, 30, 52]);
-        var right = blendColor(rightRgb, 0.96, 14, [28, 24, 22]);
-        var topLeft = blendColor(topLeftRgb, 1.12, 14, [26, 30, 58]);
-        var topRight = blendColor(topRightRgb, 1.08, 14, [28, 28, 54]);
-        var bottomLeft = blendColor(bottomLeftRgb, 0.92, 14, [26, 28, 24]);
-        var bottomRight = blendColor(bottomRightRgb, 0.94, 12, [34, 24, 18]);
+        var border = saturateColor(blendColor(rgb, 0.92, 28, [26, 26, 34]), 1.35, [26, 26, 34]);
+        var top = saturateColor(blendColor(topRgb, 1.18, 22, [28, 32, 72]), 1.65, [28, 32, 72]);
+        var bottom = saturateColor(blendColor(bottomRgb, 1.02, 16, [36, 24, 18]), 1.45, [36, 24, 18]);
+        var left = saturateColor(blendColor(leftRgb, 1.16, 20, [24, 34, 66]), 1.6, [24, 34, 66]);
+        var right = saturateColor(blendColor(rightRgb, 1.06, 16, [30, 24, 22]), 1.45, [30, 24, 22]);
+        var topLeft = saturateColor(blendColor(topLeftRgb, 1.24, 18, [26, 34, 82]), 1.7, [26, 34, 82]);
+        var topRight = saturateColor(blendColor(topRightRgb, 1.18, 18, [28, 30, 76]), 1.65, [28, 30, 76]);
+        var bottomLeft = saturateColor(blendColor(bottomLeftRgb, 1.02, 18, [28, 34, 24]), 1.42, [28, 34, 24]);
+        var bottomRight = saturateColor(blendColor(bottomRightRgb, 1.06, 16, [38, 24, 18]), 1.5, [38, 24, 18]);
 
         bodyElement.style.setProperty("--scene-rgb", rgb.join(", "));
         bodyElement.style.setProperty("--scene-deep-rgb", deep.join(", "));
@@ -425,7 +436,8 @@
         bodyElement.style.setProperty("--scene-bottom-left-rgb", bottomLeft.join(", "));
         bodyElement.style.setProperty("--scene-bottom-right-rgb", bottomRight.join(", "));
         for (var edgeIndex = 0; edgeIndex < edgeRegions.length; edgeIndex += 1) {
-          bodyElement.style.setProperty("--edge-" + edgeIndex + "-rgb", edgeRegions[edgeIndex].join(", "));
+          var vividEdge = saturateColor(edgeRegions[edgeIndex], 1.9, [22, 22, 22]);
+          bodyElement.style.setProperty("--edge-" + edgeIndex + "-rgb", vividEdge.join(", "));
         }
       }
 
@@ -628,7 +640,7 @@
         }
 
         sampleSceneTint();
-        sceneSamplerTimer = window.setInterval(sampleSceneTint, 1400);
+        sceneSamplerTimer = window.setInterval(sampleSceneTint, 180);
       }
 
       function unlockGameView() {
