@@ -20,6 +20,12 @@
         --scene-deep-rgb: 24, 12, 36;
         --scene-top-rgb: 104, 82, 188;
         --scene-bottom-rgb: 156, 88, 38;
+        --scene-left-rgb: 82, 88, 196;
+        --scene-right-rgb: 152, 84, 46;
+        --scene-top-left-rgb: 98, 90, 210;
+        --scene-top-right-rgb: 126, 78, 182;
+        --scene-bottom-left-rgb: 104, 120, 108;
+        --scene-bottom-right-rgb: 170, 98, 44;
         --scene-border-rgb: 108, 68, 150;
       }
 
@@ -30,7 +36,11 @@
       body {
         margin: 0;
         background:
-          radial-gradient(circle at top, rgba(var(--scene-rgb), 0.34), transparent 24%),
+          radial-gradient(circle at 16% 50%, rgba(var(--scene-left-rgb), 0.16), transparent 26%),
+          radial-gradient(circle at 84% 50%, rgba(var(--scene-right-rgb), 0.16), transparent 26%),
+          radial-gradient(circle at 24% 18%, rgba(var(--scene-top-left-rgb), 0.14), transparent 20%),
+          radial-gradient(circle at 76% 18%, rgba(var(--scene-top-right-rgb), 0.14), transparent 20%),
+          radial-gradient(circle at top, rgba(var(--scene-rgb), 0.28), transparent 24%),
           linear-gradient(180deg, rgb(var(--scene-deep-rgb)), var(--bg-bottom));
         color: var(--paper);
         font-family: Georgia, "Times New Roman", serif;
@@ -56,8 +66,14 @@
         box-shadow:
           0 24px 80px rgba(0, 0, 0, 0.45),
           0 0 0 1px rgba(var(--scene-border-rgb), 0.16),
+          -26px 0 78px rgba(var(--scene-left-rgb), 0.14),
+          26px 0 78px rgba(var(--scene-right-rgb), 0.14),
           0 -10px 60px rgba(var(--scene-top-rgb), 0.18),
           0 18px 70px rgba(var(--scene-bottom-rgb), 0.16),
+          -18px -12px 54px rgba(var(--scene-top-left-rgb), 0.14),
+          18px -12px 54px rgba(var(--scene-top-right-rgb), 0.14),
+          -18px 16px 58px rgba(var(--scene-bottom-left-rgb), 0.12),
+          18px 16px 58px rgba(var(--scene-bottom-right-rgb), 0.12),
           0 0 120px rgba(var(--scene-rgb), 0.1);
         transition: border-color 480ms ease, box-shadow 480ms ease;
       }
@@ -84,11 +100,17 @@
         padding: 1px;
         border-radius: inherit;
         background:
-          linear-gradient(
-            180deg,
-            rgba(var(--scene-top-rgb), 0.95) 0%,
-            rgba(var(--scene-border-rgb), 0.62) 38%,
-            rgba(var(--scene-bottom-rgb), 0.88) 100%
+          conic-gradient(
+            from 180deg at 50% 50%,
+            rgba(var(--scene-left-rgb), 0.9) 0deg,
+            rgba(var(--scene-bottom-left-rgb), 0.88) 38deg,
+            rgba(var(--scene-bottom-rgb), 0.86) 84deg,
+            rgba(var(--scene-bottom-right-rgb), 0.88) 128deg,
+            rgba(var(--scene-right-rgb), 0.92) 180deg,
+            rgba(var(--scene-top-right-rgb), 0.9) 234deg,
+            rgba(var(--scene-top-rgb), 0.86) 278deg,
+            rgba(var(--scene-top-left-rgb), 0.92) 322deg,
+            rgba(var(--scene-left-rgb), 0.9) 360deg
           );
         -webkit-mask:
           linear-gradient(#000 0 0) content-box,
@@ -321,7 +343,15 @@
         ];
       }
 
-      function setSceneTint(rgb, topRgb, bottomRgb) {
+      function setSceneTint(rgb, regions) {
+        var topRgb = regions[1];
+        var bottomRgb = regions[7];
+        var leftRgb = regions[3];
+        var rightRgb = regions[5];
+        var topLeftRgb = regions[0];
+        var topRightRgb = regions[2];
+        var bottomLeftRgb = regions[6];
+        var bottomRightRgb = regions[8];
         var deep = [
           Math.max(6, Math.round(rgb[0] * 0.22)),
           Math.max(6, Math.round(rgb[1] * 0.22)),
@@ -330,12 +360,24 @@
         var border = blendColor(rgb, 0.86, 24, [24, 24, 30]);
         var top = blendColor(topRgb, 0.98, 14, [28, 28, 42]);
         var bottom = blendColor(bottomRgb, 0.94, 12, [32, 24, 18]);
+        var left = blendColor(leftRgb, 0.96, 14, [24, 28, 42]);
+        var right = blendColor(rightRgb, 0.96, 14, [28, 24, 22]);
+        var topLeft = blendColor(topLeftRgb, 1.04, 10, [26, 28, 48]);
+        var topRight = blendColor(topRightRgb, 1.02, 10, [28, 26, 42]);
+        var bottomLeft = blendColor(bottomLeftRgb, 0.92, 14, [26, 28, 24]);
+        var bottomRight = blendColor(bottomRightRgb, 0.94, 12, [34, 24, 18]);
 
         bodyElement.style.setProperty("--scene-rgb", rgb.join(", "));
         bodyElement.style.setProperty("--scene-deep-rgb", deep.join(", "));
         bodyElement.style.setProperty("--scene-border-rgb", border.join(", "));
         bodyElement.style.setProperty("--scene-top-rgb", top.join(", "));
         bodyElement.style.setProperty("--scene-bottom-rgb", bottom.join(", "));
+        bodyElement.style.setProperty("--scene-left-rgb", left.join(", "));
+        bodyElement.style.setProperty("--scene-right-rgb", right.join(", "));
+        bodyElement.style.setProperty("--scene-top-left-rgb", topLeft.join(", "));
+        bodyElement.style.setProperty("--scene-top-right-rgb", topRight.join(", "));
+        bodyElement.style.setProperty("--scene-bottom-left-rgb", bottomLeft.join(", "));
+        bodyElement.style.setProperty("--scene-bottom-right-rgb", bottomRight.join(", "));
       }
 
       function sampleSceneTint() {
@@ -372,15 +414,12 @@
         var red = 0;
         var green = 0;
         var blue = 0;
-        var topWeight = 0;
-        var topRed = 0;
-        var topGreen = 0;
-        var topBlue = 0;
-        var bottomWeight = 0;
-        var bottomRed = 0;
-        var bottomGreen = 0;
-        var bottomBlue = 0;
+        var regionWeights = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var regionReds = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var regionGreens = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var regionBlues = [0, 0, 0, 0, 0, 0, 0, 0, 0];
         var rowWidth = sceneSamplerCanvas.width;
+        var rowHeight = sceneSamplerCanvas.height;
 
         for (var index = 0; index < imageData.length; index += 4) {
           var r = imageData[index];
@@ -407,45 +446,43 @@
 
           var pixelIndex = index / 4;
           var row = Math.floor(pixelIndex / rowWidth);
+          var column = pixelIndex % rowWidth;
+          var regionX = Math.min(2, Math.floor(column / (rowWidth / 3)));
+          var regionY = Math.min(2, Math.floor(row / (rowHeight / 3)));
+          var regionIndex = regionY * 3 + regionX;
 
-          if (row < sceneSamplerCanvas.height * 0.48) {
-            topRed += r * weight;
-            topGreen += g * weight;
-            topBlue += b * weight;
-            topWeight += weight;
-          } else {
-            bottomRed += r * weight;
-            bottomGreen += g * weight;
-            bottomBlue += b * weight;
-            bottomWeight += weight;
-          }
+          regionReds[regionIndex] += r * weight;
+          regionGreens[regionIndex] += g * weight;
+          regionBlues[regionIndex] += b * weight;
+          regionWeights[regionIndex] += weight;
         }
 
         if (!totalWeight) {
           return;
         }
 
+        var fallback = [
+          Math.round(red / totalWeight),
+          Math.round(green / totalWeight),
+          Math.round(blue / totalWeight)
+        ];
+        var regions = regionWeights.map(function (regionWeight, regionIndex) {
+          if (!regionWeight) {
+            return fallback;
+          }
+
+          return [
+            Math.round(regionReds[regionIndex] / regionWeight),
+            Math.round(regionGreens[regionIndex] / regionWeight),
+            Math.round(regionBlues[regionIndex] / regionWeight)
+          ];
+        });
+
         setSceneTint([
           Math.round(red / totalWeight),
           Math.round(green / totalWeight),
           Math.round(blue / totalWeight)
-        ], topWeight ? [
-          Math.round(topRed / topWeight),
-          Math.round(topGreen / topWeight),
-          Math.round(topBlue / topWeight)
-        ] : [
-          Math.round(red / totalWeight),
-          Math.round(green / totalWeight),
-          Math.round(blue / totalWeight)
-        ], bottomWeight ? [
-          Math.round(bottomRed / bottomWeight),
-          Math.round(bottomGreen / bottomWeight),
-          Math.round(bottomBlue / bottomWeight)
-        ] : [
-          Math.round(red / totalWeight),
-          Math.round(green / totalWeight),
-          Math.round(blue / totalWeight)
-        ]);
+        ], regions);
       }
 
       function startSceneSampling() {
