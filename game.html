@@ -169,6 +169,15 @@
         padding: 2rem;
       }
 
+      .mask-brand {
+        width: min(420px, 62vw);
+        display: block;
+        margin: 0 auto 1.15rem;
+        filter:
+          drop-shadow(0 2px 0 rgba(0, 0, 0, 0.55))
+          drop-shadow(0 12px 28px rgba(0, 0, 0, 0.45));
+      }
+
       .mask-card p,
       .mask-card h2 {
         margin: 0;
@@ -247,6 +256,7 @@
             <div class="mask-card">
               <div>
                 <p class="mask-eyebrow">Sierra Web Edition</p>
+                <img class="mask-brand" src="kq3-logo.svg" alt="King's Quest III" />
                 <h2>King's Quest III</h2>
                 <p class="mask-copy">Entering the Kingdom</p>
               </div>
@@ -487,7 +497,7 @@
               element.scrollTop = element.scrollHeight;
             }
             if (typeof text === "string" && (text.indexOf("Running King's Quest III") !== -1 || text.indexOf("AGI: Using PC-BIOS font") !== -1 || text.indexOf("Emulating Sierra AGI") !== -1)) {
-              scheduleUnlock(1800);
+              scheduleUnlock(4200);
             }
           };
         }(),
