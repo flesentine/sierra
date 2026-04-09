@@ -36,11 +36,13 @@
       body {
         margin: 0;
         background:
-          radial-gradient(circle at 16% 50%, rgba(var(--scene-left-rgb), 0.16), transparent 26%),
-          radial-gradient(circle at 84% 50%, rgba(var(--scene-right-rgb), 0.16), transparent 26%),
-          radial-gradient(circle at 24% 18%, rgba(var(--scene-top-left-rgb), 0.14), transparent 20%),
-          radial-gradient(circle at 76% 18%, rgba(var(--scene-top-right-rgb), 0.14), transparent 20%),
-          radial-gradient(circle at top, rgba(var(--scene-rgb), 0.28), transparent 24%),
+          radial-gradient(circle at 16% 50%, rgba(var(--scene-left-rgb), 0.2), transparent 26%),
+          radial-gradient(circle at 84% 50%, rgba(var(--scene-right-rgb), 0.2), transparent 26%),
+          radial-gradient(circle at 24% 18%, rgba(var(--scene-top-left-rgb), 0.2), transparent 20%),
+          radial-gradient(circle at 76% 18%, rgba(var(--scene-top-right-rgb), 0.2), transparent 20%),
+          radial-gradient(circle at 28% 84%, rgba(var(--scene-bottom-left-rgb), 0.12), transparent 18%),
+          radial-gradient(circle at 72% 84%, rgba(var(--scene-bottom-right-rgb), 0.12), transparent 18%),
+          radial-gradient(circle at top, rgba(var(--scene-rgb), 0.22), transparent 24%),
           linear-gradient(180deg, rgb(var(--scene-deep-rgb)), var(--bg-bottom));
         color: var(--paper);
         font-family: Georgia, "Times New Roman", serif;
@@ -65,16 +67,16 @@
           linear-gradient(180deg, rgba(12, 13, 20, 0.94), rgba(8, 6, 12, 0.97));
         box-shadow:
           0 24px 80px rgba(0, 0, 0, 0.45),
-          0 0 0 1px rgba(var(--scene-border-rgb), 0.16),
-          -26px 0 78px rgba(var(--scene-left-rgb), 0.14),
-          26px 0 78px rgba(var(--scene-right-rgb), 0.14),
-          0 -10px 60px rgba(var(--scene-top-rgb), 0.18),
-          0 18px 70px rgba(var(--scene-bottom-rgb), 0.16),
-          -18px -12px 54px rgba(var(--scene-top-left-rgb), 0.14),
-          18px -12px 54px rgba(var(--scene-top-right-rgb), 0.14),
-          -18px 16px 58px rgba(var(--scene-bottom-left-rgb), 0.12),
-          18px 16px 58px rgba(var(--scene-bottom-right-rgb), 0.12),
-          0 0 120px rgba(var(--scene-rgb), 0.1);
+          0 0 0 1px rgba(var(--scene-border-rgb), 0.18),
+          -30px 0 90px rgba(var(--scene-left-rgb), 0.18),
+          30px 0 90px rgba(var(--scene-right-rgb), 0.18),
+          0 -14px 72px rgba(var(--scene-top-rgb), 0.28),
+          0 20px 76px rgba(var(--scene-bottom-rgb), 0.18),
+          -20px -14px 62px rgba(var(--scene-top-left-rgb), 0.18),
+          20px -14px 62px rgba(var(--scene-top-right-rgb), 0.18),
+          -20px 18px 62px rgba(var(--scene-bottom-left-rgb), 0.14),
+          20px 18px 62px rgba(var(--scene-bottom-right-rgb), 0.14),
+          0 0 128px rgba(var(--scene-rgb), 0.08);
         transition: border-color 480ms ease, box-shadow 480ms ease;
       }
 
@@ -358,12 +360,12 @@
           Math.max(8, Math.round(rgb[2] * 0.26))
         ];
         var border = blendColor(rgb, 0.86, 24, [24, 24, 30]);
-        var top = blendColor(topRgb, 0.98, 14, [28, 28, 42]);
+        var top = blendColor(topRgb, 1.08, 18, [28, 30, 56]);
         var bottom = blendColor(bottomRgb, 0.94, 12, [32, 24, 18]);
-        var left = blendColor(leftRgb, 0.96, 14, [24, 28, 42]);
+        var left = blendColor(leftRgb, 1.04, 16, [24, 30, 52]);
         var right = blendColor(rightRgb, 0.96, 14, [28, 24, 22]);
-        var topLeft = blendColor(topLeftRgb, 1.04, 10, [26, 28, 48]);
-        var topRight = blendColor(topRightRgb, 1.02, 10, [28, 26, 42]);
+        var topLeft = blendColor(topLeftRgb, 1.12, 14, [26, 30, 58]);
+        var topRight = blendColor(topRightRgb, 1.08, 14, [28, 28, 54]);
         var bottomLeft = blendColor(bottomLeftRgb, 0.92, 14, [26, 28, 24]);
         var bottomRight = blendColor(bottomRightRgb, 0.94, 12, [34, 24, 18]);
 
@@ -421,6 +423,40 @@
         var rowWidth = sceneSamplerCanvas.width;
         var rowHeight = sceneSamplerCanvas.height;
 
+        function createBucket() {
+          return { weight: 0, red: 0, green: 0, blue: 0 };
+        }
+
+        var buckets = {
+          topLeft: createBucket(),
+          top: createBucket(),
+          topRight: createBucket(),
+          left: createBucket(),
+          right: createBucket(),
+          bottomLeft: createBucket(),
+          bottom: createBucket(),
+          bottomRight: createBucket()
+        };
+
+        function addToBucket(bucket, r, g, b, weight) {
+          bucket.red += r * weight;
+          bucket.green += g * weight;
+          bucket.blue += b * weight;
+          bucket.weight += weight;
+        }
+
+        function readBucket(bucket, fallback) {
+          if (!bucket.weight) {
+            return fallback;
+          }
+
+          return [
+            Math.round(bucket.red / bucket.weight),
+            Math.round(bucket.green / bucket.weight),
+            Math.round(bucket.blue / bucket.weight)
+          ];
+        }
+
         for (var index = 0; index < imageData.length; index += 4) {
           var r = imageData[index];
           var g = imageData[index + 1];
@@ -437,7 +473,7 @@
           }
 
           var saturation = Math.max(r, g, b) - Math.min(r, g, b);
-          var weight = 1 + saturation / 96 + brightness / 420;
+          var weight = 1 + saturation / 56 + brightness / 520;
 
           red += r * weight;
           green += g * weight;
@@ -447,14 +483,37 @@
           var pixelIndex = index / 4;
           var row = Math.floor(pixelIndex / rowWidth);
           var column = pixelIndex % rowWidth;
-          var regionX = Math.min(2, Math.floor(column / (rowWidth / 3)));
-          var regionY = Math.min(2, Math.floor(row / (rowHeight / 3)));
-          var regionIndex = regionY * 3 + regionX;
+          var x = column / Math.max(1, rowWidth - 1);
+          var y = row / Math.max(1, rowHeight - 1);
+          var isTop = y <= 0.24;
+          var isBottom = y >= 0.76;
+          var isLeft = x <= 0.24;
+          var isRight = x >= 0.76;
 
-          regionReds[regionIndex] += r * weight;
-          regionGreens[regionIndex] += g * weight;
-          regionBlues[regionIndex] += b * weight;
-          regionWeights[regionIndex] += weight;
+          if (isTop && isLeft) {
+            addToBucket(buckets.topLeft, r, g, b, weight * 1.25);
+          }
+          if (isTop && x > 0.18 && x < 0.82) {
+            addToBucket(buckets.top, r, g, b, weight * 1.35);
+          }
+          if (isTop && isRight) {
+            addToBucket(buckets.topRight, r, g, b, weight * 1.25);
+          }
+          if (isLeft && y > 0.18 && y < 0.82) {
+            addToBucket(buckets.left, r, g, b, weight * 1.15);
+          }
+          if (isRight && y > 0.18 && y < 0.82) {
+            addToBucket(buckets.right, r, g, b, weight * 1.15);
+          }
+          if (isBottom && isLeft) {
+            addToBucket(buckets.bottomLeft, r, g, b, weight * 1.05);
+          }
+          if (isBottom && x > 0.18 && x < 0.82) {
+            addToBucket(buckets.bottom, r, g, b, weight * 1.1);
+          }
+          if (isBottom && isRight) {
+            addToBucket(buckets.bottomRight, r, g, b, weight * 1.05);
+          }
         }
 
         if (!totalWeight) {
@@ -466,17 +525,17 @@
           Math.round(green / totalWeight),
           Math.round(blue / totalWeight)
         ];
-        var regions = regionWeights.map(function (regionWeight, regionIndex) {
-          if (!regionWeight) {
-            return fallback;
-          }
-
-          return [
-            Math.round(regionReds[regionIndex] / regionWeight),
-            Math.round(regionGreens[regionIndex] / regionWeight),
-            Math.round(regionBlues[regionIndex] / regionWeight)
-          ];
-        });
+        var regions = [
+          readBucket(buckets.topLeft, fallback),
+          readBucket(buckets.top, fallback),
+          readBucket(buckets.topRight, fallback),
+          readBucket(buckets.left, fallback),
+          fallback,
+          readBucket(buckets.right, fallback),
+          readBucket(buckets.bottomLeft, fallback),
+          readBucket(buckets.bottom, fallback),
+          readBucket(buckets.bottomRight, fallback)
+        ];
 
         setSceneTint([
           Math.round(red / totalWeight),
