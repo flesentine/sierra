@@ -1,0 +1,87 @@
+name: Build DOS Defrag Windows v8
+
+on:
+  push:
+    branches:
+      - artifact/dos-defrag-v8
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out artifact branch
+        uses: actions/checkout@v4
+
+      - name: Generate DOS Defrag icon
+        shell: powershell
+        run: |
+          Add-Type -AssemblyName System.Drawing
+          $out = Join-Path $PWD 'artifact-build\dos-defrag-v8\DOSDefragPixel.ico'
+          $bmp = New-Object System.Drawing.Bitmap 32,32
+          $g = [System.Drawing.Graphics]::FromImage($bmp)
+          $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::None
+          $g.Clear([System.Drawing.Color]::FromArgb(0,0,128))
+          $gray = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(170,170,170))
+          $white = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::White)
+          $yellow = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255,255,85))
+          $blue = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(0,0,170))
+          $red = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255,85,85))
+          $g.FillRectangle($gray,2,2,28,28)
+          $g.FillRectangle($blue,4,4,24,20)
+          for ($r=0; $r -lt 3; $r++) {
+            for ($c=0; $c -lt 5; $c++) {
+              $brush = if (($r -eq 0 -and $c -lt 3) -or ($r -eq 1 -and $c -lt 1)) { $yellow } else { $white }
+              $g.FillRectangle($brush,5 + $c*4,5 + $r*5,3,4)
+            }
+          }
+          $g.FillRectangle($red,6,26,18,2)
+          $icon = [System.Drawing.Icon]::FromHandle($bmp.GetHicon())
+          $fs = [System.IO.File]::Create($out)
+          $icon.Save($fs)
+          $fs.Close()
+          $icon.Dispose(); $g.Dispose(); $bmp.Dispose()
+
+      - name: Compile native screen saver
+        shell: cmd
+        run: |
+          set CSC=%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe
+          if not exist "%CSC%" set CSC=%WINDIR%\Microsoft.NET\Framework\v4.0.30319\csc.exe
+          if not exist "%CSC%" exit /b 2
+          mkdir artifact-build\dos-defrag-v8\build
+          "%CSC%" /nologo /target:winexe /optimize+ /platform:anycpu /win32icon:artifact-build\dos-defrag-v8\DOSDefragPixel.ico /out:artifact-build\dos-defrag-v8\build\DOSDefragPixel.scr /reference:System.dll /reference:System.Core.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll artifact-build\dos-defrag-v8\src\DOSDefragScreenSaver.cs
+
+      - name: Assemble ZIP package
+        shell: powershell
+        run: |
+          $root = Join-Path $PWD 'artifact-build\dos-defrag-v8'
+          $stage = Join-Path $root 'build\DOS-Defrag-Screen-Saver-Windows-v8'
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          New-Item -ItemType Directory -Force -Path (Join-Path $stage 'Source') | Out-Null
+          Copy-Item (Join-Path $root 'build\DOSDefragPixel.scr') $stage
+          Copy-Item (Join-Path $root 'DOSDefragPixel.ico') $stage
+          Copy-Item (Join-Path $root 'package\*') $stage -Recurse
+          Copy-Item (Join-Path $root 'src\DOSDefragScreenSaver.cs') (Join-Path $stage 'Source\DOSDefragScreenSaver.cs')
+          @'
+          Build DOS Defrag Pixel v8 from source
+          =====================================
+          Compiler: Windows .NET Framework C# compiler v4.0.30319
+          References: System, System.Core, System.Drawing, System.Windows.Forms
+
+          Example:
+          %WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe /nologo /target:winexe /optimize+ /platform:anycpu /win32icon:DOSDefragPixel.ico /out:DOSDefragPixel.scr /reference:System.dll /reference:System.Core.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll Source\DOSDefragScreenSaver.cs
+          '@ | Set-Content -Encoding ASCII (Join-Path $stage 'Source\BUILD_FROM_SOURCE.txt')
+          $zip = Join-Path $root 'build\DOS-Defrag-Screen-Saver-Windows-v8.zip'
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path $stage -DestinationPath $zip -CompressionLevel Optimal
+
+      - name: Upload v8 package
+        uses: actions/upload-artifact@v4
+        with:
+          name: DOS-Defrag-Screen-Saver-Windows-v8
+          path: artifact-build/dos-defrag-v8/build/DOS-Defrag-Screen-Saver-Windows-v8.zip
+          if-no-files-found: error
+          retention-days: 7
