@@ -85,6 +85,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DOS-Defrag-Screen-Saver-Windows-v8
-          path: artifact-build/dos-defrag-v8/build/DOS-Defrag-Screen-Saver-Windows-v8.zip
+          path: artifact-build/dos-defrag-v8/build/DOS-Defrag-Screen-Saver-Windows-v8/**
           if-no-files-found: error
           retention-days: 7
